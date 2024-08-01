@@ -34,5 +34,5 @@ jobs:
       run: docker build -t ynghialoe/dockercicd:latest -f Docker-Ci-Di/Dockerfile .
 
 
-    - name: Push Docker image to Docker Hub
-      run: docker push nghialoe/dockercicd:latest
+    - name: Build Docker image
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/dockercicd:latest
