@@ -33,6 +33,5 @@ jobs:
     - name: Build Docker image
       run: docker build -t ynghialoe/dockercicd:latest -f Docker-Ci-Di/Dockerfile .
 
-
     - name: List Docker images
       run: docker images
