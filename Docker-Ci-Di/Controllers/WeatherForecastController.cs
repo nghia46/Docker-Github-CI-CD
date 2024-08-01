@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace Docker_Ci_Di.Controllers
 {
@@ -8,7 +8,7 @@ namespace Docker_Ci_Di.Controllers
     {
         private static readonly string[] Summaries = new[]
         {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+            "Rét buốt", "Lạnh buốt", "Lạnh lẽo", "Mát mẻ", "Ôn hòa", "Ấm áp", "Dịu nhẹ", "Nóng", "Oi bức", "Nóng như thiêu đốt"
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
