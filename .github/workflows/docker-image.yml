@@ -31,7 +31,10 @@ jobs:
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
     - name: Build Docker image
-      run: docker build -t ynghialoe/dockercicd:latest -f Docker-Ci-Di/Dockerfile .
-
+      run: docker build -t nghialoe/dockercicd:latest -f Docker-Ci-Di/Dockerfile .
+    
     - name: List Docker images
       run: docker images
+      
+    - name: Push Docker image to Docker Hub
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/dockercicd:latest
