@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dockercicd-deployment-v1
+  annotations:
+    deployment.kubernetes.io/change-cause: "Initial deployment"
+    app.kubernetes.io/version: "1.0.0"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dockercicd
+  template:
+    metadata:
+      labels:
+        env: prod
+        app: dockercicd
+        app.kubernetes.io/name: dockercicd
+    spec:
+      containers:
+        - name: dockercicd
+          image: nghialoe/dockercicd:latest
+          ports:
+            - containerPort: 80
+              name: http-web-api
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://*:80"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-lb-service
+spec:
+  selector:
+    app.kubernetes.io/name: dockercicd
+  ports:
+    - name: http-web-api
+      protocol: TCP
+      port: 8080
+      targetPort: 80
+  type: LoadBalancer
