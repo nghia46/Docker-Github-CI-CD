@@ -32,7 +32,7 @@ namespace Docker_Ci_Di.Controllers
         [HttpGet("Greetings")]
         public IActionResult GetGreetings()
         {
-            return Ok("Hello from k8s!");
+            return Ok("Hello from k8s! v2");
         }
     }
 }
