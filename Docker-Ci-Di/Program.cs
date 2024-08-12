@@ -1,3 +1,5 @@
+using Docker_Ci_Di.AMQP;
+using MassTransit;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,8 +11,30 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 //Name the Swagger 
 builder.Services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "Test Ci/Di Api", Version = "v1" }); });
+// 
+builder.Services.AddScoped<IMessagePublisher, MessagePublisher>();
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((cxt, cfg) =>
+    {
+        cfg.Host(new Uri(builder.Configuration["RabbitMQ:Host"] ?? throw new NullReferenceException()), h =>
+        {
+            h.Username(builder.Configuration["RabbitMQ:Username"] ?? throw new NullReferenceException());
+            h.Password(builder.Configuration["RabbitMQ:Password"] ?? throw new NullReferenceException());
+        });
+    });
+    // Add hosted service for MassTransit
+});
+builder.Services.AddHostedService<MassTransitHostedService>();
 
 var app = builder.Build();
+
+// Start and stop MassTransit bus with the application
+var bus = app.Services.GetRequiredService<IBusControl>();
+var lifetime = app.Services.GetService<IHostApplicationLifetime>();
+
+lifetime?.ApplicationStarted.Register(() => bus?.StartAsync());
+lifetime?.ApplicationStopping.Register(() => bus?.StopAsync());
 
 // Configure the HTTP request pipeline.
 

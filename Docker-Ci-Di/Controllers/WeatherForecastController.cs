@@ -1,23 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Docker_Ci_Di.AMQP;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Docker_Ci_Di.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class WeatherForecastController(IMessagePublisher messagePublisher) : ControllerBase
     {
         private static readonly string[] Summaries = new[]
         {
-            "Rét buốt", "Lạnh buốt", "Lạnh lẽo", "Mát mẻ", "Ôn hòa", "Ấm áp", "Dịu nhẹ", "Nóng", "Oi bức", "Nóng như thiêu đốt"
+            "Rét buốt", "Lạnh buốt", "Lạnh lẽo", "Mát mẻ", "Ôn hòa", "Ấm áp", "Dịu nhẹ", "Nóng", "Oi bức",
+            "Nóng như thiêu đốt"
         };
-
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        {
-            _logger = logger;
-        }
-
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
@@ -33,6 +27,26 @@ namespace Docker_Ci_Di.Controllers
         public IActionResult GetGreetings()
         {
             return Ok("Hello from k8s! v2");
+        }
+
+        [HttpGet("Publish-Message")]
+        public async Task<IActionResult> PublishMessage(string mgs)
+        {
+            try
+            {
+                var message = new TextMessage
+                {
+                    Text = mgs
+                };
+                await messagePublisher.PublishAsync(message, QueueName.TestQueue, CancellationToken.None);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.StackTrace);
+                throw;
+            }
+
+            return Ok($"Message is publish to {QueueName.TestQueue}");
         }
     }
 }
