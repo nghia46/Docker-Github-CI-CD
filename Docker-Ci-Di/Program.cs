@@ -10,30 +10,29 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 //Name the Swagger 
-builder.Services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "Test Ci/Di Api", Version = "v1" }); });
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Test Ci/Di Api", Version = "v1" });
+});
 // 
 builder.Services.AddScoped<IMessagePublisher, MessagePublisher>();
 builder.Services.AddMassTransit(x =>
 {
     x.UsingRabbitMq((cxt, cfg) =>
     {
-        cfg.Host(new Uri(builder.Configuration["RabbitMQ:Host"] ?? throw new NullReferenceException()), h =>
+        cfg.Host(new Uri(builder.Configuration["RabbitMQ:Host"]), h =>
         {
-            h.Username(builder.Configuration["RabbitMQ:Username"] ?? throw new NullReferenceException());
-            h.Password(builder.Configuration["RabbitMQ:Password"] ?? throw new NullReferenceException());
+            h.Username(builder.Configuration["RabbitMQ:Username"]);
+            h.Password(builder.Configuration["RabbitMQ:Password"]);
         });
     });
     // Add hosted service for MassTransit
 });
-builder.Services.AddHostedService<MassTransitHostedService>();
 
-var app = builder.Build();
-#region  defaultService
+#region defaultService
+
 builder.Services.AddSingleton(builder.Configuration);
 builder.Configuration.AddJsonFile($"appsettings.json");
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
@@ -43,7 +42,12 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
+
 #endregion
+
+builder.Services.AddHostedService<MassTransitHostedService>();
+
+var app = builder.Build();
 
 // Start and stop MassTransit bus with the application
 var bus = app.Services.GetRequiredService<IBusControl>();
@@ -55,7 +59,11 @@ lifetime?.ApplicationStopping.Register(() => bus?.StopAsync());
 // Configure the HTTP request pipeline.
 
 //Load swagger.json following root directory 
-app.UseSwaggerUI(c => { c.SwaggerEndpoint("/v1/swagger.json", "Test Ci/Di Api"); c.RoutePrefix = string.Empty; });
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/v1/swagger.json", "Test Ci/Di Api");
+    c.RoutePrefix = string.Empty;
+});
 //Get swagger.json following root directory 
 app.UseSwagger(options => { options.RouteTemplate = "{documentName}/swagger.json"; });
 
