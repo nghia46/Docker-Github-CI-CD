@@ -28,6 +28,22 @@ builder.Services.AddMassTransit(x =>
 builder.Services.AddHostedService<MassTransitHostedService>();
 
 var app = builder.Build();
+#region  defaultService
+builder.Services.AddSingleton(builder.Configuration);
+builder.Configuration.AddJsonFile($"appsettings.json");
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+#endregion
 
 // Start and stop MassTransit bus with the application
 var bus = app.Services.GetRequiredService<IBusControl>();
@@ -44,7 +60,7 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/v1/swagger.json", "Test Ci/Di Api");
 app.UseSwagger(options => { options.RouteTemplate = "{documentName}/swagger.json"; });
 
 app.UseAuthorization();
-
+app.UseCors();
 app.MapControllers();
 
 app.Run();
