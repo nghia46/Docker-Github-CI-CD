@@ -25,8 +25,20 @@ builder.Services.AddMassTransit(x =>
             h.Username(builder.Configuration["RabbitMQ:Username"]);
             h.Password(builder.Configuration["RabbitMQ:Password"]);
         });
+        // Thiết lập Retry
+        cfg.UseRetry(retryConfig =>
+        {
+            retryConfig.Interval(5, TimeSpan.FromSeconds(10)); // Thử lại 5 lần, mỗi lần cách nhau 10 giây
+        });
+
+        // Tùy chọn khác như Timeout, CircuitBreaker nếu cần
+        cfg.UseCircuitBreaker(cbConfig =>
+        {
+            cbConfig.TrackingPeriod = TimeSpan.FromMinutes(1);
+            cbConfig.ActiveThreshold = 5;
+            cbConfig.ResetInterval = TimeSpan.FromMinutes(5);
+        });
     });
-    // Add hosted service for MassTransit
 });
 
 #region defaultService
@@ -45,6 +57,7 @@ builder.Services.AddCors(options =>
 
 #endregion
 
+// Add hosted service for MassTransit
 builder.Services.AddHostedService<MassTransitHostedService>();
 
 var app = builder.Build();
