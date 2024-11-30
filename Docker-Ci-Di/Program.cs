@@ -71,14 +71,21 @@ lifetime?.ApplicationStopping.Register(() => bus?.StopAsync());
 
 // Configure the HTTP request pipeline.
 
-//Load swagger.json following root directory 
+// Cấu hình Swagger UI
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/v1/swagger.json", "Test Ci/Di Api");
-    c.RoutePrefix = string.Empty;
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Test Ci/Di API");
+    c.RoutePrefix = "swagger"; // Swagger UI sẽ phục vụ tại /swagger
 });
-//Get swagger.json following root directory 
-app.UseSwagger(options => { options.RouteTemplate = "{documentName}/swagger.json"; });
+
+// Cấu hình Swagger JSON
+app.UseSwagger(options =>
+{
+    options.RouteTemplate = "swagger/{documentName}/swagger.json";  // Swagger JSON sẽ có đường dẫn /swagger/v1/swagger.json
+});
+
+// Xử lý tất cả các yêu cầu mà không cần định nghĩa rõ ràng
+app.UseRouting();
 
 app.UseAuthorization();
 app.UseCors();
