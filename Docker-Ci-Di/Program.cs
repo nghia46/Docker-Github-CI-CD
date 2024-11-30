@@ -73,13 +73,13 @@ lifetime?.ApplicationStopping.Register(() => bus?.StopAsync());
 
 // Configure the HTTP request pipeline.
 
-app.UsePathBase("/cidiapp"); // Thiết lập base path là /cidiapp
+app.UsePathBase("/cicdapp"); // Thiết lập base path là /cidiapp
 
 // Cấu hình Swagger UI
 app.UseSwaggerUI(c =>
 {
     // Cập nhật đường dẫn Swagger JSON với base path mới
-    c.SwaggerEndpoint("/cidiapp/swagger/v1/swagger.json", "Test Ci/Di API");
+    c.SwaggerEndpoint("/cicdapp/swagger/v1/swagger.json", "Test Ci/Di API");
     c.RoutePrefix = "swagger"; // Swagger UI sẽ phục vụ tại /cidiapp/swagger
 });
 
