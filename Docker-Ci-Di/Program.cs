@@ -9,13 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-//Name the Swagger 
+// Name the Swagger 
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Test Ci/Di Api", Version = "v1" });
 });
-// 
+
 builder.Services.AddScoped<IMessagePublisher, MessagePublisher>();
+
 builder.Services.AddMassTransit(x =>
 {
     x.UsingRabbitMq((cxt, cfg) =>
@@ -25,6 +26,7 @@ builder.Services.AddMassTransit(x =>
             h.Username(builder.Configuration["RabbitMQ:Username"]);
             h.Password(builder.Configuration["RabbitMQ:Password"]);
         });
+
         // Thiết lập Retry
         cfg.UseRetry(retryConfig =>
         {
@@ -71,22 +73,25 @@ lifetime?.ApplicationStopping.Register(() => bus?.StopAsync());
 
 // Configure the HTTP request pipeline.
 
+app.UsePathBase("/cidiapp"); // Thiết lập base path là /cidiapp
+
 // Cấu hình Swagger UI
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Test Ci/Di API");
-    c.RoutePrefix = "swagger"; // Swagger UI sẽ phục vụ tại /swagger
+    // Cập nhật đường dẫn Swagger JSON với base path mới
+    c.SwaggerEndpoint("/cidiapp/swagger/v1/swagger.json", "Test Ci/Di API");
+    c.RoutePrefix = "swagger"; // Swagger UI sẽ phục vụ tại /cidiapp/swagger
 });
 
 // Cấu hình Swagger JSON
 app.UseSwagger(options =>
 {
-    options.RouteTemplate = "swagger/{documentName}/swagger.json";  // Swagger JSON sẽ có đường dẫn /swagger/v1/swagger.json
+    // Đảm bảo Swagger JSON có thể truy cập qua /cidiapp/swagger/v1/swagger.json
+    options.RouteTemplate = "/swagger/{documentName}/swagger.json"; 
 });
 
-// Xử lý tất cả các yêu cầu mà không cần định nghĩa rõ ràng
+// Xử lý các yêu cầu
 app.UseRouting();
-
 app.UseAuthorization();
 app.UseCors();
 app.MapControllers();
