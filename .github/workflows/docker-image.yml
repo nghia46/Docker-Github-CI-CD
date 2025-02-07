@@ -13,37 +13,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '8.0'
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.0"
 
-    - name: Build project
-      run: dotnet build --configuration Release
+      - name: Build project
+        run: dotnet build --configuration Release
 
-    - name: Publish project
-      run: dotnet publish --configuration Release --output ./publish
+      - name: Publish project
+        run: dotnet publish --configuration Release --output ./publish
 
-    - name: Log in to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    - name: Build Docker image
-      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/dockercicd:latest -f Docker-Ci-Di/Dockerfile .
-    
-    - name: List Docker images
-      run: docker images
-      
-    - name: Push Docker image to Docker Hub
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/dockercicd:latest
-    
-    - name: Push to Railway
-      run: |
-        curl -X POST "https://backboard.railway.app/graphql/v2" \
-        -H "Authorization: Bearer ${{ secrets.RAILWAY_API_TOKEN }}" \
-        -H "Content-Type: application/json" \
-        --data '{
-        "query": "mutation { deploymentCreate(input: {serviceId: \"${{ secrets.RAILWAY_SERVICE_ID }}\", image: \"${{ secrets.DOCKER_USERNAME }}/dockercicd:latest\"}) { id } }"
-        }'
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/dockercicd:latest -f Docker-Ci-Di/Dockerfile .
+
+      - name: List Docker images
+        run: docker images
+
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/dockercicd:latest
+
+      - name: Push to Railway
+        run: |
+          curl -X POST "https://backboard.railway.com/graphql/v2/projects/${{ secrets.RAILWAY_PROJECT_ID }}/services/${{ secrets.RAILWAY_SERVICE_ID }}/deploy" \
+          -H "Authorization: Bearer ${{ secrets.RAILWAY_API_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          --data '{"image": "${{ secrets.DOCKER_USERNAME }}/dockercicd:latest"}'
