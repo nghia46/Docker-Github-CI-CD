@@ -28,40 +28,20 @@ jobs:
       run: dotnet publish --configuration Release --output ./publish
 
     - name: Log in to Docker Hub
-      run: |
-        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-        if [ $? -ne 0 ]; then
-          echo "Docker login failed"
-          exit 1
-        fi
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
     - name: Build Docker image
       run: docker build -t ${{ secrets.DOCKER_USERNAME }}/dockercicd:latest -f Docker-Ci-Di/Dockerfile .
-
+    
     - name: List Docker images
       run: docker images
-
+      
     - name: Push Docker image to Docker Hub
-      run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/dockercicd:latest
-        if [ $? -ne 0 ]; then
-          echo "Docker push failed"
-          exit 1
-        fi
-
-    - name: Install jq for JSON processing
-      run: sudo apt-get install -y jq
-
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/dockercicd:latest
+    
     - name: Push to Railway
       run: |
-        IMAGE="${{ secrets.DOCKER_USERNAME }}/dockercicd:latest"
-        PAYLOAD=$(jq -n --arg image "$IMAGE" '{"image": $image}')
-        
-        curl -X POST "https://backboard.railway.app/v1/projects/${{ secrets.RAILWAY_PROJECT_ID }}/services/${{ secrets.RAILWAY_SERVICE_ID }}/deploy" \
-          -H "Authorization: Bearer ${{ secrets.RAILWAY_API_TOKEN }}" \
-          -H "Content-Type: application/json" \
-          --data "$PAYLOAD"
-        if [ $? -ne 0 ]; then
-          echo "Railway deployment failed"
-          exit 1
-        fi
+        curl -X POST "https://backboard.railway.com/graphql/v2/projects/${{ secrets.RAILWAY_PROJECT_ID }}/services/${{ secrets.RAILWAY_SERVICE_ID }}/deploy" \
+        -H "Authorization: Bearer ${{ secrets.RAILWAY_API_TOKEN }}" \
+        -H "Content-Type: application/json" \
+        --data '{"image": "${{ secrets.DOCKER_USERNAME }}/dockercicd:latest"}'
