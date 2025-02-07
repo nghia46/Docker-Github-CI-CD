@@ -44,30 +44,11 @@ jobs:
           curl -X POST "https://backboard.railway.app/graphql/v2" \
           -H "Authorization: Bearer ${{ secrets.RAILWAY_API_TOKEN }}" \
           -H "Content-Type: application/json" \
-          --data '{
-            "query": "mutation deploymentTriggerUpdate($id: String!, $input: DeploymentTriggerUpdateInput!) {
-              deploymentTriggerUpdate(id: $id, input: $input) {
-                __typename
-                baseEnvironmentOverrideId
-                branch
-                checkSuites
-                environmentId
-                id
-                projectId
-                provider
-                repository
-                serviceId
-                validCheckSuites
-              }
-            }",
-            "variables": {
-              "id": "${{ secrets.RAILWAY_SERVICE_ID }}",
-              "input": {
-                "serviceId": "${{ secrets.RAILWAY_SERVICE_ID }}",
-                "branch": "main",
-                "repository": "https://github.com/${{ github.repository }}",
-                "provider": "GITHUB",
-                "image": "${{ secrets.DOCKER_USERNAME }}/dockercicd:latest"
-              }
-            }
-          }'
+          --data "$(jq -n --arg id "${{ secrets.RAILWAY_SERVICE_ID }}" \
+          --arg serviceId "${{ secrets.RAILWAY_SERVICE_ID }}" \
+          --arg branch "main" \
+          --arg repository "https://github.com/${{ github.repository }}" \
+          --arg provider "GITHUB" \
+          --arg image "${{ secrets.DOCKER_USERNAME }}/dockercicd:latest" \
+          '{ "query": "mutation deploymentTriggerUpdate($id: String!, $input: DeploymentTriggerUpdateInput!) { deploymentTriggerUpdate(id: $id, input: $input) { id } }", "variables": { "id": $id, "input": { "serviceId": $serviceId, "branch": $branch, "repository": $repository, "provider": $provider, "image": $image } } }')"
+      
