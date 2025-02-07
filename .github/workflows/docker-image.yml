@@ -41,7 +41,7 @@ jobs:
     
     - name: Push to Railway
       run: |
-        curl -X POST "https://api.railway.app/projects/${{ secrets.RAILWAY_PROJECT_ID }}/services/${{ secrets.RAILWAY_SERVICE_ID }}/deploy" \
+        curl -X POST "https://api.railway.app/v1/projects/${{ secrets.RAILWAY_PROJECT_ID }}/services/${{ secrets.RAILWAY_SERVICE_ID }}/deploy" \
         -H "Authorization: Bearer ${{ secrets.RAILWAY_API_TOKEN }}" \
         -H "Content-Type: application/json" \
         --data '{"image": "nghialoe/dockercicd:latest"}'
